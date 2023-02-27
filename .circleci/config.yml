@@ -47,6 +47,11 @@ jobs:
           paths:
             - /caches/app.tar
       - run:
+          name: Install package dependencies
+          command: |
+            apt-get install update
+            apt-get install -y curl
+      - run:
           name: Load Docker image layer cache
           command: |
             set +o pipefail
