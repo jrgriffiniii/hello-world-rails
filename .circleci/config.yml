@@ -57,7 +57,7 @@ jobs:
             docker run \
               --name hello_world \
               --env PORT=3000 \
-              --publish 3000:3000 \
+              --publish 0.0.0.0:3000:3000 \
               --init \
               --rm \
               --detach \
