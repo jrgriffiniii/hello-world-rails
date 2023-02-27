@@ -1,56 +1,62 @@
 ---
-version: 2
+version: 2.1
 jobs:
   build:
     working_directory: /app
     docker:
-      - image: docker:17.05.0-ce-git
+      # - image: docker:17.05.0-ce-git
+      - image: docker:latest
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 20.10.18
+          docker_layer_caching: true
 
       - restore_cache:
           keys:
             - v1-{{ .Branch }}
           paths:
-            - /caches/app.tar
+            - /caches/hello-world-rails.tar
       - run:
           name: Load Docker image layer cache
           command: |
             set +o pipefail
-            docker load -i /caches/app.tar | true
+            docker load -i /caches/hello-world-rails.tar | true
       - run:
           name: Build application Docker image
           command: |
-            docker build --cache-from=app -t app .
+            docker build --cache-from=hello-world-rails -t hello-world-rails .
       - run:
           name: Save Docker image layer cache
           command: |
             mkdir -p /caches
-            docker save -o /caches/app.tar app
+            docker save -o /caches/hello-world-rails.tar hello-world-rails
       - save_cache:
           key: v1-{{ .Branch }}-{{ epoch }}
           paths:
-            - /caches/app.tar
+            - /caches/hello-world-rails.tar
+      #- deploy:
+      #    name: Push application Docker image
+      #    command: |
+      #      docker tag hello-world-rails "jrgriffiniii/hello-world-rails:${CIRCLE_SHA1}"
+      #      docker push "jrgriffiniii/hello-world-rails:${CIRCLE_SHA1}"
 
   test:
-    working_directory: /app
     docker:
-      - image: docker:17.05.0-ce-git
+      - image: hello-world-rails:latest"
     steps:
       - checkout
-      - setup_remote_docker
 
       - restore_cache:
           keys:
             - v1-{{ .Branch }}
           paths:
-            - /caches/app.tar
+            - /caches/hello-world-rails.tar
       - run:
           name: Load Docker image layer cache
           command: |
             set +o pipefail
-            docker load -i /caches/app.tar | true
+            docker load -i /caches/hello-world-rails.tar | true
       - run:
           name: Run the Rails application
           command: |
@@ -61,7 +67,7 @@ jobs:
               --init \
               --rm \
               --detach \
-              app:latest
+              hello-world-rails:latest
       - run:
           name: Request a response from the Rails server
           command: |
@@ -72,7 +78,7 @@ workflows:
   ci:
     jobs:
       - build
-      - test
-      #- test:
-      #    requires:
-      #      - build
+      #- test
+      - test:
+          requires:
+            - build
