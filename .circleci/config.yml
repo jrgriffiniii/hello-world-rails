@@ -60,6 +60,7 @@ jobs:
               --publish 3000:3000 \
               --init \
               --rm \
+              --detach \
               app:latest
       - run:
           name: Request a response from the Rails server
@@ -71,6 +72,7 @@ workflows:
   ci:
     jobs:
       - build
-      - test:
-          requires:
-            - build
+      - test
+      #- test:
+      #    requires:
+      #      - build
