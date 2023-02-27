@@ -40,9 +40,28 @@ jobs:
           name: Wait for the Rails app.
           command: dockerize -wait tcp://localhost:3000 -timeout 1m
 
+  zap:
+    docker:
+      - image: cimg/ruby:3.2-browsers
+        environment:
+          RAILS_ENV: test
+      - image: jrgriffiniii/hello-world-rails:latest
+        environment:
+          PORT: 3000
+    steps:
+      - run:
+          name: Wait for the Rails app.
+          command: dockerize -wait tcp://localhost:3000 -timeout 1m
+      - run:
+          name: Perform a quick scan using ZAP
+          command: zap-cli quick-scan -daemon -newsession session -s xss,sqli --spider -r http://0.0.0.0:3000/
+
 workflows:
   version: 2
   ci:
     jobs:
       - build
       - test
+      - zap:
+          requires:
+            - test
