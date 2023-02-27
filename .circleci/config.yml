@@ -1,0 +1,48 @@
+---
+version: 2.1
+jobs:
+  build:
+    working_directory: /app
+    docker:
+      - image: docker:latest
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 20.10.18
+          docker_layer_caching: true
+
+      - restore_cache:
+          keys:
+            - v1-{{ .Branch }}
+          paths:
+            - /caches/hello-world-rails.tar
+      # This is not currently used, however, should it be helpful for optimization later...
+      - run:
+          name: Load Docker image layer cache
+          command: |
+            set +o pipefail
+            docker load -i /caches/hello-world-rails.tar | true
+      - run:
+          name: Build application Docker image
+          command: |
+            docker build --cache-from=hello-world-rails -t hello-world-rails .
+
+  test:
+    docker:
+      - image: cimg/ruby:3.2-browsers
+        environment:
+          RAILS_ENV: test
+      - image: jrgriffiniii/hello-world-rails:latest
+        environment:
+          PORT: 3000
+    steps:
+      - run:
+          name: Wait for the Rails app.
+          command: dockerize -wait tcp://localhost:3000 -timeout 1m
+
+workflows:
+  version: 2
+  ci:
+    jobs:
+      - build
+      - test
