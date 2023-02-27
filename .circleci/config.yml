@@ -4,7 +4,6 @@ jobs:
   build:
     working_directory: /app
     docker:
-      # - image: docker:17.05.0-ce-git
       - image: docker:latest
     steps:
       - checkout
@@ -46,7 +45,9 @@ jobs:
       - image: jrgriffiniii/hello-world-rails:latest
         environment:
           PORT: 3000
-      - image: cimg/base:current-22.04
+      - image: cimg/ruby:3.1-browsers
+        environment:
+          RAILS_ENV: test
     steps:
       - run:
           name: Wait for the Rails app.
