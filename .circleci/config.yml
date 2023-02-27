@@ -43,42 +43,21 @@ jobs:
 
   test:
     docker:
-      - image: hello-world-rails:latest"
+      - image: jrgriffiniii/hello-world-rails:latest
+        environment:
+          PORT: 3000
+      - image: cimg/base:current-22.04
     steps:
-      - checkout
-
-      - restore_cache:
-          keys:
-            - v1-{{ .Branch }}
-          paths:
-            - /caches/hello-world-rails.tar
       - run:
-          name: Load Docker image layer cache
-          command: |
-            set +o pipefail
-            docker load -i /caches/hello-world-rails.tar | true
-      - run:
-          name: Run the Rails application
-          command: |
-            docker run \
-              --name hello_world \
-              --env PORT=3000 \
-              --publish 0.0.0.0:3000:3000 \
-              --init \
-              --rm \
-              --detach \
-              hello-world-rails:latest
-      - run:
-          name: Request a response from the Rails server
-          command: |
-            wget http://0.0.0.0:3000/
+          name: Wait for the Rails app.
+          command: dockerize -wait tcp://localhost:3000 -timeout 1m
 
 workflows:
   version: 2
   ci:
     jobs:
       - build
-      #- test
-      - test:
-          requires:
-            - build
+      - test
+      #- test:
+      #    requires:
+      #      - build
