@@ -8,12 +8,6 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      - run:
-          name: Install dependencies
-          command: |
-            # Ensure that pip repositories for Docker are available
-            apk add --no-cache \
-              py-pip=9.0.0-r1
 
       - restore_cache:
           keys:
@@ -38,3 +32,44 @@ jobs:
           key: v1-{{ .Branch }}-{{ epoch }}
           paths:
             - /caches/app.tar
+
+  test:
+    working_directory: /app
+    docker:
+      - image: docker:17.05.0-ce-git
+    steps:
+      - checkout
+      - setup_remote_docker
+
+      - restore_cache:
+          keys:
+            - v1-{{ .Branch }}
+          paths:
+            - /caches/app.tar
+      - run:
+          name: Load Docker image layer cache
+          command: |
+            set +o pipefail
+            docker load -i /caches/app.tar | true
+      - run:
+          name: Run the Rails application
+          command: |
+            docker run \
+              --name hello_world \
+              --publish 3000:3000 \
+              --init \
+              --rm \
+              app:latest
+      - run:
+          name: Request a response from the Rails server
+          command: |
+            curl http://0.0.0.0:3000/
+
+workflows:
+  version: 2
+  ci:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
