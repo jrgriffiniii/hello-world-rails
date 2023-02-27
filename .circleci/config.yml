@@ -47,11 +47,6 @@ jobs:
           paths:
             - /caches/app.tar
       - run:
-          name: Install package dependencies
-          command: |
-            apt-get install update
-            apt-get install -y curl
-      - run:
           name: Load Docker image layer cache
           command: |
             set +o pipefail
@@ -70,7 +65,7 @@ jobs:
       - run:
           name: Request a response from the Rails server
           command: |
-            curl http://0.0.0.0:3000/
+            wget http://0.0.0.0:3000/
 
 workflows:
   version: 2
