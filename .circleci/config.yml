@@ -53,9 +53,9 @@ jobs:
       - setup_remote_docker:
           version: 20.10.18
           docker_layer_caching: true
-      - run:
-          name: Wait for the Rails app.
-          command: dockerize -wait tcp://localhost:3000 -timeout 1m
+      #- run:
+      #    name: Wait for the Rails app.
+      #    command: dockerize -wait tcp://localhost:3000 -timeout 1m
       - run:
           name: Perform a quick scan using ZAP
           command: docker run -v $(pwd):/zap/wrk/:rw -t owasp/zap2docker-stable zap.sh -cmd -autorun /zap/wrk/zap.yaml
