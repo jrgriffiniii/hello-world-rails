@@ -54,7 +54,7 @@ jobs:
           command: dockerize -wait tcp://localhost:3000 -timeout 1m
       - run:
           name: Perform a quick scan using ZAP
-          command: zap-cli quick-scan -daemon -newsession session -s xss,sqli --spider -r http://0.0.0.0:3000/
+          command: docker run -v $(pwd):/zap/wrk/:rw -t owasp/zap2docker-stable zap.sh -cmd -autorun /zap/wrk/zap.yaml
 
 workflows:
   version: 2
