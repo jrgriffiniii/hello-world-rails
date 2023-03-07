@@ -50,7 +50,6 @@ jobs:
       - setup_remote_docker:
           version: 20.10.18
           docker_layer_caching: true
-      #zap.sh -cmd -autorun /zap/wrk/zap.yaml
       - run:
           name: Perform a quick scan using ZAP
           command: |
@@ -58,7 +57,7 @@ jobs:
               --volume $(pwd):/zap/wrk/:rw \
               --tty \
               owasp/zap2docker-stable \
-              ls /zap/wrk
+              zap.sh -cmd -autorun /zap/wrk/zap.yaml
 
 workflows:
   version: 2
